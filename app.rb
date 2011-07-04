@@ -30,7 +30,7 @@ JS_ASSETS = %w[zepto.js underscore.js app.coffee]
 
 helpers do
   def javascript_includes
-    assets = settings.production? ? 'all.js' : JS_ASSETS.map {|f| File.basename(f, '.*') + '.js' }
+    assets = settings.production? ? %w[all.js] : JS_ASSETS.map {|f| File.basename(f, '.*') + '.js' }
     assets.map {|a| %(<script src="/#{a}"></script>) }.join("\n")
   end
 
