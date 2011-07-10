@@ -31,10 +31,14 @@ module SinatraBoilerplate
       settings.js_assets
     end
 
+    def javascript_includes_names
+      if settings.production? then %w[/all.js]
+      else javascript_assets.map {|f| "/#{File.basename(f, '.*')}.js" }
+      end
+    end
+
     def javascript_includes
-      if settings.production? then %w[all.js]
-      else javascript_assets.map {|f| File.basename(f, '.*') + '.js' }
-      end.map {|a| %(<script src="/#{a}"></script>) }.join("\n")
+      javascript_includes_names.map {|a| %(<script src="#{a}"></script>) }.join("\n")
     end
 
     def javascript_files
@@ -84,6 +88,16 @@ module SinatraBoilerplate
 
       render_javascript files
     end
+  end
+end
+
+# monkeypatch to Tilt to enable rendering coffeescript with multibyte
+# characters in it
+Tilt::CoffeeScriptTemplate.class_eval do
+  alias original_prepare prepare
+  def prepare
+    original_prepare
+    data.force_encoding @default_encoding
   end
 end
 
