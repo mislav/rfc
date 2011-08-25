@@ -1,0 +1,11 @@
+<% if list? %>
+  <%= render extract_list %>
+<% else %>
+  <% for block in blocks %>
+    <% if block.is_a? Array %>
+      <p><% for el in block %><% if el.is_a? Rfc::Xref %><a href="<%= el.href %>"><%== el.text %></a><% else %><%== el.text %><% end %><% end %></p>
+    <% else %>
+      <%= render block %>
+    <% end %>
+  <% end %>
+<% end %>

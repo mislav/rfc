@@ -1,0 +1,16 @@
+<article>
+<h1><%= title %></h1>
+<% if authors? %>
+  <p>Authors:</p>
+  <ol><% for author in authors %>
+    <li>
+      <%== author.name %>
+      <% if author.role? %>(<%= author.role %>)<% end %>
+    </li>
+  <% end %></ol>
+<% end %>
+
+<% for section in sections %>
+  <%= render section %>
+<% end %>
+</article>

@@ -1,0 +1,8 @@
+<figure<% if id? %> id="<%= id %>"<% end %>>
+  <% if title? %>
+    <figcaption><%== title %></figcaption>
+  <% elsif preamble? %>
+    <figcaption><%= render preamble %></figcaption>
+  <% end %>
+  <pre><%== text %></pre>
+</figure>
