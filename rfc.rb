@@ -9,6 +9,26 @@ module Rfc
   class NodeWrapper < DelegateClass(Nokogiri::XML::Node) 
     extend ActiveSupport::Memoizable
 
+    # a reference to the main Document object
+    attr_accessor :document
+
+    attr_reader :classnames
+
+    def initialize(node)
+      super(node)
+      @classnames = []
+    end
+
+    # wrap a sub-element
+    def wrap(node, klass, *args)
+      node = at(node) if String === node
+      return nil if node.blank?
+      element = klass.new(node, *args)
+      element.document = self.document
+      yield element if block_given?
+      element
+    end
+
     def template_name
       self.class.name.demodulize.underscore
     end
@@ -65,6 +85,10 @@ module Rfc
       text_at 'organization'
     end
 
+    def organization_short
+      text_at './organization/@abbrev'
+    end
+
     def email
       text_at './address/email'
     end
@@ -75,27 +99,30 @@ module Rfc
   end
 
   class Section < NodeWrapper
-    attr_reader :level
+    attr_writer :title, :level
+    attr_accessor :level
 
-    def initialize(node, level)
+    def initialize(node, parent = nil)
       super node
-      @level = level
+      @title = nil
+      @parent = parent
+      self.level = @parent ? @parent.level + 1 : 2
     end
 
     def title
-      self['title']
+      @title || self['title']
     end
 
     def id
-      self['anchor'].presence or title.parameterize
+      self['anchor'].presence # or title.parameterize
     end
 
     def elements
       element_children.map do |node|
         case node.name
-        when 'section' then Section.new(node, level + 1)
-        when 'figure' then Figure.new(node)
-        when 't' then Text.new(node)
+        when 'section' then wrap(node, Section, self)
+        when 'figure' then wrap(node, Figure)
+        when 't' then wrap(node, Text)
         else
           raise "unrecognized section-level node: #{node.name}"
         end
@@ -104,12 +131,22 @@ module Rfc
   end
 
   class Xref < NodeWrapper
+    # todo: smart text insertion
     def text
+      super.presence || target
+    end
+
+    # todo: proper linkage (e.g. "refs.RFC2223")
+    def target
       self['target']
     end
 
     def href
-      '#' + self['target'].parameterize
+      if (target =~ /^[\w-]+:/) == 0
+        target
+      else
+        '#' + target.parameterize
+      end
     end
   end
 
@@ -122,13 +159,15 @@ module Rfc
         if node.element?
           case node.name
           when 'list'
-            all << List.new(node) << []
+            all << wrap(node, List) << []
           when 'vspace'
             # presentation element. ignore
-          when 'xref'
-            all.last << Xref.new(node)
+          when 'xref', 'eref'
+            all.last << wrap(node, Xref)
           when 'spanx'
-            all.last << Span.new(node)
+            all.last << wrap(node, Span)
+          when 'iref'
+            # ignore
           else
             $stderr.puts node.inspect if $-d
             raise "unrecognized text-level node: #{node.name}"
@@ -140,11 +179,12 @@ module Rfc
     end
 
     def list?
-      element_children.map(&:node_name) == %w[list]
+      element_children.map(&:node_name) == %w[list] and
+        children.select(&:text?).all?(&:blank?)
     end
 
-    def extract_list
-      List.new at('./list')
+    def list
+      wrap('./list', List)
     end
   end
 
@@ -152,7 +192,7 @@ module Rfc
     def elements
       element_children.map do |node|
         case node.name
-        when 't' then Text.new(node)
+        when 't' then wrap(node, Text)
         else
           raise "unrecognized list-level node: #{node.name}"
         end
@@ -160,7 +200,7 @@ module Rfc
     end
 
     def style
-      type = self['style']
+      type = self['style'].presence || 'empty'
       type = 'alpha' if type == 'format (%C)'
       type
     end
@@ -179,23 +219,31 @@ module Rfc
       self['title']
     end
 
+    def text?
+      text.present?
+    end
+
     def text
       unindent text_at('./artwork')
     end
 
+    def preamble
+      wrap('./preamble', Text) { |t| t.classnames << 'preamble' }
+    end
+
+    def postamble
+      wrap('./postamble', Text) { |t| t.classnames << 'postamble' }
+    end
+
+    protected
+
     def unindent(text)
       text = text.rstrip.gsub(/\r|\r\n/, "\n")
-      lines = text.split("\n").reject(&:empty?)
+      lines = text.split("\n").reject(&:blank?)
       indentation = lines.map {|l| l.match(/^[ \t]*/)[0].to_s.size }.min
-      text.gsub!(/^[ \t]{#{indentation}}/, '').sub!(/\A\s+\n/, '')
-    end
-
-    def preamble?
-      !!at('./preamble')
-    end
-
-    def preamble
-      Text.new at('./preamble')
+      text.gsub!(/^[ \t]{#{indentation}}/, '')
+      text.sub!(/\A\s+\n/, '')
+      text
     end
   end
 
@@ -203,6 +251,10 @@ module Rfc
     def initialize(from)
       super Nokogiri::XML(from)
       scope '/rfc'
+    end
+
+    def document
+      self
     end
 
     def title
@@ -214,17 +266,71 @@ module Rfc
     end
 
     def authors
-      all('./front/author').map {|node| Author.new node }
+      all('./front/author').map {|node| wrap(node, Author) }
     end
 
     def sections
-      all('./middle/section').map {|node| Section.new(node, 2) }
+      all('./middle/section').map {|node| wrap(node, Section) }
+    end
+
+    def month
+      text_at './front/date/@month'
+    end
+
+    def year
+      text_at './front/date/@year'
+    end
+
+    def abstract
+      wrap('./front/abstract', Section) do |s|
+        s.title = 'Abstract'
+        s.classnames << 'abstract'
+      end
+    end
+
+    def keywords
+      all('./front/keyword/text()').map(&:text)
     end
   end
 
   module Helpers
     def section_title(section)
-      "<h#{section.level}>#{section.title}</h#{section.level}>"
+      "<h#{section.level}>#{h section.title}</h#{section.level}>"
+    end
+
+    def id_attribute
+      id? ? %( id="#{h id}") : ''
+    end
+
+    def class_attribute(names = classnames)
+      names = Array(names)
+      names.any?? %[ class="#{h names.join(' ')}"] : ''
+    end
+
+    def render_inline(elements)
+      elements.map do |el|
+        if el.is_a? Xref
+          link_to el.text, el.href
+        else
+          h el.text
+        end
+      end.join('')
+    end
+
+    def h(str)
+      Erubis::XmlHelper.escape_xml(str)
+    end
+
+    def link_to(text, href, classnames = nil)
+      if href.present?
+        %(<a href="#{h href}"#{class_attribute(classnames)}>#{h text}</a>)
+      else
+        h text
+      end
+    end
+
+    def mail_to(email, text = email, classnames = nil)
+      link_to text, "mailto:#{email}", classnames
     end
   end
 

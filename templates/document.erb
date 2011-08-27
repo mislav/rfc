@@ -1,14 +1,28 @@
+<title><%== title %></title>
+<link rel="stylesheet" href="rfc.css">
+<style>body { string-set: short-title "<%== (short_title || title).gsub('"', '\"') %>" }</style>
+<meta name="keywords" content="<%== keywords.join(', ') %>">
+
 <article>
-<h1><%= title %></h1>
-<% if authors? %>
-  <p>Authors:</p>
-  <ol><% for author in authors %>
-    <li>
-      <%== author.name %>
-      <% if author.role? %>(<%= author.role %>)<% end %>
-    </li>
-  <% end %></ol>
-<% end %>
+<section class="titlepage">
+  <h1><%== title %></h1>
+
+  <% if abstract? %><%= render abstract %><% end %>
+
+  <% if authors? %>
+  <section class="authors">
+    <p>Authors:</p>
+    <ol><% for author in authors %>
+      <li class="vcard">
+        <%= link_to author.name, author.url, %w[url fn] %><% if author.organization? %>,
+          <span class="org"><%== author.organization %><% end %></span>
+        <% if author.role? %>(<%== author.role %>)<% end %>
+        <% if author.email? %><%= mail_to author.email, author.email, 'email' %><% end %>
+      </li>
+    <% end %></ol>
+  </section>
+  <% end %>
+</section>
 
 <% for section in sections %>
   <%= render section %>

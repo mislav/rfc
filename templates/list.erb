@@ -1,10 +1,10 @@
 <% case style %>
-<% when 'symbols' %>
-  <ul><% for element in elements %>
+<% when 'symbols', 'empty' %>
+  <ul class="<%= style %>"><% for element in elements %>
     <li><%= render element %></li>
   <% end %></ul>
-<% when 'alpha' %>
-  <ol style="list-style:upper-latin"><% for element in elements %>
+<% when 'numbers', 'alpha' %>
+  <ol class="<%= style %>"><% for element in elements %>
     <li><%= render element %></li>
   <% end %></ol>
 <% when 'hanging' %>
