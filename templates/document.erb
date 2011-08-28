@@ -27,4 +27,22 @@
 <% for section in sections %>
   <%= render section %>
 <% end %>
+
+<% if references? %>
+<section class="references">
+  <h2>References</h2>
+  <ol><% for reference in references %>
+    <%= render reference %>
+  <% end %></ol>
+</section>
+<% end %>
+
+<% if back_sections? %>
+<section class="appendix">
+  <h2>Appendix</h2>
+  <% for section in back_sections %>
+    <%= render section %>
+  <% end %>
+</section>
+<% end %>
 </article>

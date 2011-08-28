@@ -1,0 +1,5 @@
+<li<%= id_attribute %>>
+  <%= link_to title, url %>
+  <% if series? %>(<%== series.join(', ') %>)<% end %><% if year? %>,
+    <%== month %> <%== year %><% end %>
+</li>

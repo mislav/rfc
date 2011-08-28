@@ -131,12 +131,10 @@ module Rfc
   end
 
   class Xref < NodeWrapper
-    # todo: smart text insertion
     def text
-      super.presence || target
+      super.presence || document.lookup_anchor(target) || target
     end
 
-    # todo: proper linkage (e.g. "refs.RFC2223")
     def target
       self['target']
     end
@@ -247,6 +245,36 @@ module Rfc
     end
   end
 
+  class Reference < NodeWrapper
+    def id?
+      self['anchor'].present?
+    end
+
+    def id
+      self['anchor'].parameterize
+    end
+
+    def title
+      text_at 'title'
+    end
+
+    def url
+      text_at './@target'
+    end
+
+    def month
+      text_at './/date/@month'
+    end
+
+    def year
+      text_at './/date/@year'
+    end
+
+    def series
+      all('./seriesInfo').map {|s| "#{s['name']} #{s['value']}" }
+    end
+  end
+
   class Document < NodeWrapper
     def initialize(from)
       super Nokogiri::XML(from)
@@ -273,6 +301,17 @@ module Rfc
       all('./middle/section').map {|node| wrap(node, Section) }
     end
 
+    def back_sections
+      all('./back/section').map {|node|
+        wrap(node, Section) { |s|
+          s.classnames << 'back'
+          # indent them one level deeper since we're wrapping them
+          # in an additional <section> element manually
+          s.level = 3
+        }
+      }
+    end
+
     def month
       text_at './front/date/@month'
     end
@@ -290,6 +329,30 @@ module Rfc
 
     def keywords
       all('./front/keyword/text()').map(&:text)
+    end
+
+    def anchor_map
+      all('.//*[@anchor]').each_with_object({}) do |node, map|
+        map[node['anchor']] = node
+      end
+    end
+
+    def lookup_anchor(name)
+      if node = anchor_map[name]
+        if 'reference' == node.node_name
+          if series = node.at('./seriesInfo[@name="RFC"]')
+            "RFC #{series['value']}"
+          elsif title = node.at('.//title')
+            title.text
+          end
+        else
+          node['title']
+        end
+      end
+    end
+
+    def references
+      all('./back/references/reference').map {|node| wrap(node, Reference) }
     end
   end
 
