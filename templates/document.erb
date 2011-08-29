@@ -5,6 +5,10 @@
 
 <article>
 <section class="titlepage">
+  <% if number? %><p class="rfc">
+    RFC <%== number %>
+    <% if category? %>(<%== category %> document)<% end %>
+  </p><% end %>
   <h1><%== title %></h1>
 
   <% if abstract? %><%= render abstract %><% end %>

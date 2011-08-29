@@ -285,6 +285,22 @@ module Rfc
       self
     end
 
+    def number
+      self['number']
+    end
+
+    CATEGORIES = {
+      "std" => 'Standards-Track',
+      "bcp" => 'Best Current Practices',
+      "exp" => 'Experimental Protocol',
+      "historic" => 'historic',
+      "info" => 'Informational'
+    }
+
+    def category
+      CATEGORIES[self['category'] || 'info']
+    end
+
     def title
       text_at './front/title'
     end
