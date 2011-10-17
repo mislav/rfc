@@ -11,15 +11,3 @@ end
 get "/" do
   haml :index
 end
-
-get "/style.css" do
-  expires 1.day
-  last_modified file_mtime('style.sass')
-  sass :style
-end
-
-get "/app.js" do
-  expires 5.minutes
-  last_modified file_mtime('app.coffee')
-  coffee :app
-end
