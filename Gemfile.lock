@@ -1,0 +1,53 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activesupport (3.2.3)
+      i18n (~> 0.6)
+      multi_json (~> 1.0)
+    coffee-script (2.2.0)
+      coffee-script-source
+      execjs
+    coffee-script-source (1.3.1)
+    daemons (1.1.8)
+    erubis (2.7.0)
+    eventmachine (0.12.10)
+    execjs (1.3.0)
+      multi_json (~> 1.0)
+    i18n (0.6.0)
+    multi_json (1.3.2)
+    nokogiri (1.5.2)
+    rack (1.4.1)
+    rack-protection (1.2.0)
+      rack
+    sass (3.2.0.alpha.96)
+    shotgun (0.9)
+      rack (>= 1.0)
+    sinatra (1.3.2)
+      rack (~> 1.3, >= 1.3.6)
+      rack-protection (~> 1.2)
+      tilt (~> 1.3, >= 1.3.3)
+    therubyracer-heroku (0.8.1.pre3)
+    thin (1.3.1)
+      daemons (>= 1.0.9)
+      eventmachine (>= 0.12.6)
+      rack (>= 1.0.0)
+    tilt (1.3.3)
+    uglifier (1.2.4)
+      execjs (>= 0.3.0)
+      multi_json (>= 1.0.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activesupport
+  coffee-script
+  erubis
+  i18n
+  nokogiri
+  sass (> 3.2.0.alpha)
+  shotgun
+  sinatra
+  therubyracer-heroku (~> 0.8.1.pre3)
+  thin
+  uglifier

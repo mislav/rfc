@@ -1,7 +1,5 @@
-<title><%== title %></title>
-<link rel="stylesheet" href="rfc.css">
 <style>body { string-set: short-title "<%== (short_title || title).gsub('"', '\"') %>" }</style>
-<meta name="keywords" content="<%== keywords.join(', ') %>">
+<!--<meta name="keywords" content="<%== keywords.join(', ') %>">-->
 
 <article>
 <section class="titlepage">
@@ -28,6 +26,15 @@
   <% end %>
 </section>
 
+<aside>
+  <ol class=toc><% for section in sections %>
+    <li><a href="#<%= section.id %>"><%= section.title %></a></li>
+    <ol><% for subsection in section.sections %>
+      <li><a href="#<%= subsection.id %>"><%= subsection.title %></a></li>
+    <% end %></ol>
+  <% end %></ol>
+</aside>
+
 <% for section in sections %>
   <%= render section %>
 <% end %>
@@ -49,4 +56,5 @@
   <% end %>
 </section>
 <% end %>
+
 </article>

@@ -7,7 +7,8 @@ $LOAD_PATH.unshift File.join($LOAD_PATH.first, 'lib')
 
 Encoding.default_external = 'utf-8'
 
-# require 'ruby-debug' if ENV['RACK_ENV'] == 'development'
+# https://devcenter.heroku.com/articles/ruby#logging
+$stdout.sync = true
 
 require 'app'
 run Sinatra::Application

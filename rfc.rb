@@ -5,7 +5,7 @@ require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/inflections'
 require 'erubis'
 
-module Rfc
+module RFC
   class NodeWrapper < DelegateClass(Nokogiri::XML::Node) 
     extend ActiveSupport::Memoizable
 
@@ -115,7 +115,8 @@ module Rfc
     end
 
     def id
-      self['anchor'].presence # or title.parameterize
+      # FIXME: ensure unique IDs
+      self['anchor'].presence or title.parameterize
     end
 
     def elements
@@ -128,6 +129,10 @@ module Rfc
           raise "unrecognized section-level node: #{node.name}"
         end
       end
+    end
+
+    def sections
+      elements.select {|e| Section === e }
     end
   end
 
@@ -415,6 +420,7 @@ module Rfc
   end
 
   module TemplateHelpers
+    extend self
     def render(obj, template = obj.template_name)
       file = "templates/#{template}.erb"
       eruby = Erubis::Eruby.new File.read(file), filename: File.basename(file)
@@ -427,9 +433,9 @@ module Rfc
 end
 
 if __FILE__ == $0
-  rfc = Rfc::Document.new ARGF
+  rfc = RFC::Document.new ARGF
 
-  include Rfc::TemplateHelpers
+  include RFC::TemplateHelpers
   begin
     puts render(rfc)
   ensure

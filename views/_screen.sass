@@ -1,0 +1,21 @@
+// https://github.com/jcroft/jeffcroft-css-framework-v2/blob/054fdbd/framework/css/contrib/_media_queries.sass
+=screen($type)
+  @if $type == phone
+    @media only screen and (max-width : 480px)
+      @content
+  @if $type == nonphone
+    @media only screen and (min-width : 481px)
+      @content
+  @else if $type == tablet
+    @media only screen and (min-width : 481px) and (max-width : 768px)
+      @content
+  @else if $type == ipad-landscape
+    @media only screen and (device-width: 768px) and (orientation: landscape)
+  @else if $type == large
+    @media only screen and (min-width : 769px)
+      @content
+  @else if $type == retina
+    @media only screen and (-webkit-min-device-pixel-ratio: 2)
+      @content
+  @else
+    @warn "unrecognized type: #{$type}"
