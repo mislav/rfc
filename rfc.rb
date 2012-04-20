@@ -63,6 +63,7 @@ module Rfc
       define_method(:"#{name}?") { !self.send(name).blank? }
     end
 
+    # TODO: remove memoization
     def self.method_added(name)
       if public_method_defined?(name) and not method_defined?(:"_unmemoized_#{name}") and
           name !~ /_unmemoized_|_memoizable$|^freeze$|[?!=]$/ and instance_method(name).arity.zero?
@@ -425,9 +426,9 @@ module Rfc
   end
 end
 
-rfc = Rfc::Document.new ARGF
+if __FILE__ == $0
+  rfc = Rfc::Document.new ARGF
 
-if true
   include Rfc::TemplateHelpers
   begin
     puts render(rfc)
