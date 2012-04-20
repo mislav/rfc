@@ -318,17 +318,42 @@ ul.toc > li.chapter::before {
 
 /* TODO: chapter numbers */
 
-// article, .article {
-//   section, div.section {
-//     counter-reset: chapter;
-//     h2, h3, h4, h5, h6 {
-//       &::before {
-//         content: counters(chapter, ".") ". ";
-//         counter-increment: chapter;
-//       }
-//     }
-//   }
-// }
+article, .article {
+  // can't use nested counters because of HTML structure
+  counter-reset: chapter;
+  h2 {
+    counter-increment: chapter;
+    &::before { content: counter(chapter) ". "; }
+  }
+  h3 {
+    counter-increment: section;
+    &::before { content: counter(chapter) "." counter(section) ". "; }
+  }
+  h4 {
+    counter-increment: sub-section;
+    &::before { content: counter(chapter) "." counter(section) "." counter(sub-section) ". "; }
+  }
+  // don't count anything on the title page
+  .titlepage {
+    h2, h3, h4 { &::before { content: normal } }
+  }
+  .titlepage + section, .titlepage + .section {
+    counter-reset: chapter;
+  }
+  // poor man's nested counters
+  > section, > .section {
+    counter-reset: section;
+    > section, > .section {
+      counter-reset: sub-section;
+    }
+  }
+  .appendix {
+    h3::before {
+      content: "Appendix " counter(section, upper-alpha) ": ";
+    }
+    h4::before { content: normal }
+  }
+}
 
 h1 { string-set: header content(); }
 section > h2, div.section > h2 {
