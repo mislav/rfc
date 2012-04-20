@@ -10,5 +10,11 @@ Encoding.default_external = 'utf-8'
 # https://devcenter.heroku.com/articles/ruby#logging
 $stdout.sync = true
 
+require 'rack/cache'
+use Rack::Cache,
+  :verbose     => true,
+  :metastore   => "file:#{ENV['TMPDIR']}/rack/meta",
+  :entitystore => "file:#{ENV['TMPDIR']}/rack/body"
+
 require 'app'
 run Sinatra::Application

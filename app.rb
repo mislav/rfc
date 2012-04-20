@@ -19,10 +19,12 @@ configure :development do
 end
 
 get "/" do
+  expires 500, :public
   erb :index, {}, title: "Pretty RFCs"
 end
 
 get "/oauth" do
+  expires 500, :public
   doc = RFC::Document.new File.open('draft-ietf-oauth-v2-25.xml')
   html = RFC::TemplateHelpers.render doc
   render :str, html, {layout_engine: :erb}, title: "OAuth 2.0"

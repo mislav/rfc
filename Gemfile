@@ -4,6 +4,7 @@ gem 'sinatra'
 gem 'thin'
 gem 'activesupport'
 gem 'i18n' # stupid activesupport dependency
+gem 'rack-cache'
 
 group :development do
   gem 'shotgun'
