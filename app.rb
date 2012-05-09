@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'sinatra'
-require 'sinatra_boilerplate'
-require 'rfc'
+require_relative 'lib/sinatra_boilerplate'
+require_relative 'rfc'
 
 set :sass do
   options = {
@@ -17,6 +17,14 @@ set :js_assets, %w[zepto.js app.coffee]
 configure :development do
   set :logging, false
   ENV['DATABASE_URL'] ||= 'postgres://localhost/rfc'
+end
+
+configure :production do
+  require 'rack/cache'
+  use Rack::Cache,
+    :verbose     => true,
+    :metastore   => "file:#{ENV['TMPDIR']}/rack/meta",
+    :entitystore => "file:#{ENV['TMPDIR']}/rack/body"
 end
 
 require 'dm-migrations'

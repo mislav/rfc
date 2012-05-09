@@ -2,19 +2,12 @@ require 'rubygems'
 require 'bundler'
 
 Bundler.setup
-$LOAD_PATH.unshift ENV['APP_ROOT'] || File.expand_path('..', __FILE__)
-$LOAD_PATH.unshift File.join($LOAD_PATH.first, 'lib')
+root = ENV['APP_ROOT'] || File.expand_path('..', __FILE__)
 
 Encoding.default_external = 'utf-8'
 
 # https://devcenter.heroku.com/articles/ruby#logging
 $stdout.sync = true
 
-require 'rack/cache'
-use Rack::Cache,
-  :verbose     => true,
-  :metastore   => "file:#{ENV['TMPDIR']}/rack/meta",
-  :entitystore => "file:#{ENV['TMPDIR']}/rack/body"
-
-require 'app'
+require File.join(root, 'app')
 run Sinatra::Application
