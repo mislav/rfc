@@ -12,9 +12,11 @@ end
 
 gem 'sass', '> 3.2.0.alpha'
 gem 'coffee-script'
-# gem 'therubyracer', :group => :development
 gem 'therubyracer-heroku', '~> 0.8.1.pre3', :group => :production
 gem 'uglifier'
 
 gem 'nokogiri'
 gem 'erubis'
+
+gem 'dm-postgres-adapter'
+gem 'dm-migrations'

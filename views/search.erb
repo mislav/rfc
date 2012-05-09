@@ -1,0 +1,19 @@
+<div class=container>
+
+  <h1>Search for <%= @query.inspect %></h1>
+
+  <% if @results.any? %>
+  <ol>
+    <% for rfc in @results %>
+      <li>
+        <h2><%= rfc.document_id %>: <%= rfc.title %></h2>
+        <%= rfc.abstract %>
+      </li>
+    <% end %>
+  </ol>
+
+  <% else %>
+    <p>No results.</p>
+  <% end %>
+
+</div>
