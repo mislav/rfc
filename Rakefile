@@ -56,3 +56,27 @@ file 'tmp/rfc-index.xml' do |task|
   index_url = 'ftp://ftp.rfc-editor.org/in-notes/rfc-index.xml'
   sh 'curl', '-#', index_url, '-o', task.name
 end
+
+task :import_popular => :environment do
+  require 'nokogiri'
+  require 'open-uri'
+
+  popular = []
+  pop_url = 'http://www.faqs.org/rfc-pop%d.html'
+
+  (1..5).each do |n|
+    html = Nokogiri open(pop_url % n)
+    html.search('#fmaincolumn a[href^="/rfcs/"]').each do |link|
+      popular << File.basename(link['href'], '.html')
+    end
+  end
+
+  popular.each_with_index do |name, idx|
+    if entry = RfcEntry.get_rfc(name)
+      entry.popularity = idx + 1
+      entry.save!
+    else
+      warn "could not find #{name}"
+    end
+  end
+end

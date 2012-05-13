@@ -12,6 +12,7 @@ class RfcEntry
   property :body,         Text
   property :obsoleted,    Boolean, default: false
   property :publish_date, Date
+  property :popularity,   Integer
 
   def keywords=(value)
     if Array === value
@@ -23,5 +24,12 @@ class RfcEntry
 
   searchable title: 'A', keywords: 'B',
              abstract: 'C', body: 'D'
+
+  def self.get_rfc num
+    num.to_s.gsub(/[^a-z0-9]+/i, '') =~ /^([a-z]*)(\d+)$/i
+    type, num = $1.to_s.upcase, Integer($2)
+    type = 'RFC' if type.empty?
+    get "#{type}%04d" % num
+  end
 end
 

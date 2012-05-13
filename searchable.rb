@@ -43,7 +43,7 @@ module Searchable
         ts_rank_cd(search_vector, query) AS search_rank
       FROM #{storage_name}, plainto_tsquery('english', ?) query
       WHERE search_vector @@ query
-      ORDER BY search_rank DESC
+      ORDER BY popularity, search_rank DESC
       LIMIT ? OFFSET ?
     SQL
   end
