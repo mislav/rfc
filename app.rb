@@ -27,8 +27,7 @@ configure :production do
     :entitystore => "file:#{ENV['TMPDIR']}/rack/body"
 end
 
-require 'dm-migrations'
-require_relative 'searchable'
+require 'dm-core'
 
 configure :development do
   DataMapper::Logger.new($stderr, :debug)
@@ -38,25 +37,7 @@ configure do
   DataMapper.setup(:default, ENV['DATABASE_URL'])
 end
 
-class RfcEntry
-  include DataMapper::Resource
-  extend Searchable
-
-  property :document_id, String, length: 10,   key: true
-  property :title,       String, length: 255
-  property :abstract,    Text,   length: 2200
-  property :keywords,    Text,   length: 500
-
-  def keywords=(value)
-    if Array === value
-      super(value.empty?? nil : value.join(', '))
-    else
-      super
-    end
-  end
-
-  searchable [:title, :abstract, :keywords]
-end
+require_relative 'models'
 
 get "/" do
   cache_control :public
@@ -66,7 +47,7 @@ end
 
 get "/search" do
   @query = params[:q]
-  @results = RfcEntry.search @query, limit: 50
+  @results = RfcEntry.search_raw @query, page: params[:page], limit: 50
   erb :search, {}, title: "RFC search"
 end
 
