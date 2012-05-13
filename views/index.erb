@@ -1,30 +1,27 @@
 <div id=home class=container>
 
-  <h1>The RFC is now <em>diamonds</em></h1>
+  <div class=hero-unit>
+    <h1>The RFC is now <em>diamonds</em></h1>
+    <p>
+    <abbr title="Request For Comments" class=initialism>RFC</abbr>s are
+    documents produced by
+    <a href="http://www.ietf.org">The Internet Enginnering Task Force</a>,
+    and many are official standards for various Internet protocols.
+    This site indexes and formats these documents for easier finding &amp; viewing.
+    </p>
 
-  <form action=/search>
-    <input type=search name=q placeholder="Search RFC titles">
-    <input type=submit value="Search">
-  </form>
-
-  <div class=well>
-  <p>
-  Sample RFC: <a href=/oauth>OAuth 2.0</a>
-  </p>
-
-  <p>Sample PDF for RFC: <a href="https://s3.amazonaws.com/mislav/oauth.pdf">oauth.pdf</a></p>
+    <form action=/search class=form-search>
+      <input type=search class=search-query name=q placeholder="Search RFCs">
+      <input type=submit value="Search" class=btn>
+    </form>
   </div>
 
-  <p>More to come:</p>
-  <ul>
-    <li>Intro about what RFCs are</li>
-    <li>Search for RFCs</li>
-    <li>Search by content</li>
-    <li>EPUB and Kindle versions</li>
-  </ul>
+  <p>Coming next: PDF, EPUB &amp; Kindle formats</p>
 
-  <footer><p>
-  By <a href="http://mislav.uniqpath.com">Mislav</a> ·
-  <a href="https://github.com/mislav/rfc">Code on GitHub</a>.
-  </p></footer>
+  <footer>
+    <p>
+    By <a href="http://mislav.uniqpath.com">Mislav</a> ·
+    <a href="https://github.com/mislav/rfc">Source code on GitHub</a>.
+    </p>
+  </footer>
 </div>

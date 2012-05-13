@@ -1,6 +1,12 @@
 <!doctype html>
-<title><%= title %></title>
-<%#= javascript_includes %>
-<link rel=stylesheet type="text/css" href=style.css>
+<html>
+<head>
+  <title><%= page_title %></title>
+  <%#= javascript_includes %>
+  <link rel=stylesheet type="text/css" href=/style.css>
+</head>
 
-<%= yield %>
+<body>
+  <%= yield %>
+</body>
+</html>

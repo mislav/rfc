@@ -1,16 +1,36 @@
-<div class=container>
+<% page_title "RFC search: %s" % @query.inspect %>
+<div id=search class=container>
 
-  <h1>Search for <%= @query.inspect %></h1>
+
+  <div class=page-header>
+    <nav><a href="<%= home_path %>">&larr; Home</a></nav>
+    <h1>Search results for <%= @query.inspect %></h1>
+  </div>
+
+  <form action=/search class=form-search>
+    <input type=search class=search-query name=q placeholder="Search RFCs" value="<%= @query %>">
+    <input type=submit value="Search" class=btn>
+  </form>
 
   <% if @results.any? %>
   <ol>
     <% for rfc in @results %>
-      <li>
-        <h2><%= rfc.document_id %>: <%= rfc.title %></h2>
-        <%= rfc.abstract %>
+      <li<%= ' class=obsoleted' if rfc.obsoleted %>>
+        <span class=document-id><%= display_document_id rfc %></span>
+        <% if rfc.obsoleted %><span class="label label-warning">obsolete</span><% end %>
+        <h2><a href="<%= rfc_path rfc %>"><%= rfc.title %></a></h2>
+        <%= rfc.abstract.try(:sub, /\[STANDARDS[ -]{1,2}TRA?CK\]/, '') %>
       </li>
     <% end %>
   </ol>
+
+  <% if @limit == @results.size %>
+    <ul class=pager>
+      <li class=next>
+        <a rel=next href="<%= search_path(:page => Integer(params[:page] || 1) + 1) %>">Next page &rarr;</a>
+      </li>
+    </ul>
+  <% end %>
 
   <% else %>
     <p>No results.</p>

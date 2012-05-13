@@ -39,16 +39,54 @@ end
 
 require_relative 'models'
 
+helpers do
+  def display_document_id doc_id
+    doc_id = doc_id.document_id if doc_id.respond_to? :document_id
+    doc_id.sub(/(\d+)/, ' \1')
+  end
+
+  def display_abstract text
+    text.sub(/\[STANDARDS[ -]{1,2}TRA?CK\]/, '') if text
+  end
+
+  def search_path options = {}
+    get_params = request.GET.merge('page' => options[:page])
+    url '/search?' + Rack::Utils.build_query(get_params), false
+  end
+
+  def rfc_path doc_id
+    doc_id = doc_id.document_id if doc_id.respond_to? :document_id
+    url doc_id, false
+  end
+
+  def home_path
+    url '/'
+  end
+
+  def page_title title = nil
+    if title
+      @page_title = title
+    else
+      @page_title
+    end
+  end
+end
+
+before do
+  page_title "Pretty RFCs"
+end
+
 get "/" do
   cache_control :public
   last_modified File.mtime('views/index.erb')
-  erb :index, {}, title: "Pretty RFCs"
+  erb :index
 end
 
 get "/search" do
   @query = params[:q]
-  @results = RfcEntry.search_raw @query, page: params[:page], limit: 50
-  erb :search, {}, title: "RFC search"
+  @limit = 50
+  @results = RfcEntry.search_raw @query, page: params[:page], limit: @limit
+  erb :search
 end
 
 get "/oauth" do
