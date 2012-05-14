@@ -16,12 +16,23 @@
     </form>
   </div>
 
-  <p>Coming next: PDF, EPUB &amp; Kindle formats</p>
+  <div class=row>
+    <aside id=featured class=span8>
+      <h2>Featured documents:</h2>
+      <ul>
+        <li><a href="<%= url '/RFC2616' %>">RFC 2616: HTTP/1.1</a></li>
+        <li><a href="<%= url '/RFC3986' %>">RFC 3986: URI syntax</a></li>
+        <li><a href="<%= url '/RFC2460' %>">RFC 2460: IPv6 specification</a></li>
+        <li><a href="<%= url '/RFC3920' %>">RFC 3920: XMPP core</a></li>
+      </ul>
+    </aside>
 
-  <footer>
-    <p>
-    By <a href="http://mislav.uniqpath.com">Mislav</a> ·
-    <a href="https://github.com/mislav/rfc">Source code on GitHub</a>.
-    </p>
-  </footer>
+    <footer class=span4>
+      <p>Coming next: PDF, EPUB &amp; Kindle formats</p>
+      <p>
+      By <a href="http://mislav.uniqpath.com">Mislav</a> ·
+      <a href="https://github.com/mislav/rfc">Source code on GitHub</a>.
+      </p>
+    </footer>
+  </div>
 </div>
