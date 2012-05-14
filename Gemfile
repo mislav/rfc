@@ -5,6 +5,7 @@ gem 'thin'
 gem 'activesupport'
 gem 'i18n' # stupid activesupport dependency
 gem 'rack-cache'
+gem 'dalli'
 
 group :development do
   gem 'shotgun'

@@ -21,9 +21,9 @@ end
 configure :production do
   require 'rack/cache'
   use Rack::Cache,
-    :verbose     => true,
-    :metastore   => "file:#{ENV['TMPDIR']}/rack/meta",
-    :entitystore => "file:#{ENV['TMPDIR']}/rack/body"
+    verbose:     true,
+    metastore:   'memcached://localhost/meta',
+    entitystore: 'memcached://localhost/body?compress=true'
 end
 
 require 'dm-core'
