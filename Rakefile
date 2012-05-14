@@ -4,6 +4,8 @@ task :environment do
   require_relative 'app'
 end
 
+task :bootstrap => [:'db:rebuild', :import_index, :import_popular]
+
 namespace :db do
   task :rebuild => :environment do
     DataMapper.auto_migrate!
