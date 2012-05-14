@@ -80,6 +80,10 @@ before do
   page_title "Pretty RFCs"
 end
 
+error 404 do
+  erb :not_found
+end
+
 get "/" do
   cache_control :public
   last_modified File.mtime('views/index.erb')
@@ -94,8 +98,8 @@ get "/search" do
   erb :search
 end
 
-get "/:doc_id" do
-  @rfc = RfcDocument.fetch(params[:doc_id]) { halt 404 }
+get %r{^/ (?<doc_id> [a-z]* -? \d+) $}ix do
+  @rfc = RfcDocument.fetch(params[:doc_id]) { not_found }
   redirect to(@rfc.id) unless request.path == "/#{@rfc.id}"
 
   cache_control :public
