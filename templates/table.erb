@@ -1,0 +1,26 @@
+<% if preamble? %>
+  <%= render preamble %>
+<% end %>
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <% for col in columns %>
+        <th><%== col.text %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% for row in rows %>
+    <tr>
+      <% for cell in row %>
+        <td><%= render cell %></td>
+      <% end %>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<% if postamble? %>
+  <%= render postamble %>
+<% end %>

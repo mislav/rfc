@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'sinatra'
 require_relative 'lib/sinatra_boilerplate'
-require_relative 'rfc'
 
 set :sass do
   options = {
@@ -39,10 +38,15 @@ end
 
 require_relative 'models'
 
+configure do
+  DataMapper.finalize
+  DataMapper::Model.raise_on_save_failure = true
+  RfcFetcher.download_dir = File.expand_path('../tmp/xml', __FILE__)
+end
+
 helpers do
-  def display_document_id doc_id
-    doc_id = doc_id.document_id if doc_id.respond_to? :document_id
-    doc_id.sub(/(\d+)/, ' \1')
+  def display_document_id doc
+    doc.id.sub(/(\d+)/, ' \1')
   end
 
   def display_abstract text
@@ -54,8 +58,8 @@ helpers do
     url '/search?' + Rack::Utils.build_query(get_params), false
   end
 
-  def rfc_path doc_id
-    doc_id = doc_id.document_id if doc_id.respond_to? :document_id
+  def rfc_path doc
+    doc_id = String === doc ? doc : doc.id
     url doc_id, false
   end
 
@@ -83,15 +87,20 @@ get "/" do
 end
 
 get "/search" do
+  expires 5 * 60, :public
   @query = params[:q]
   @limit = 50
-  @results = RfcEntry.search_raw @query, page: params[:page], limit: @limit
+  @results = RfcDocument.search @query, page: params[:page], limit: @limit
   erb :search
 end
 
-get "/oauth" do
-  expires 3600, :public
-  doc = RFC::Document.new File.open('draft-ietf-oauth-v2-25.xml')
-  html = RFC::TemplateHelpers.render doc
-  render :str, html, {layout_engine: :erb}, title: "OAuth 2.0"
+get "/:doc_id" do
+  @rfc = RfcDocument.fetch(params[:doc_id]) { halt 404 }
+  redirect to(@rfc.id) unless request.path == "/#{@rfc.id}"
+
+  cache_control :public
+  last_modified @rfc.last_modified
+
+  @rfc.make_pretty ->(xref) { rfc_path(xref) if xref =~ /^RFC\d+$/ }
+  erb :show
 end

@@ -1,9 +1,14 @@
+<% if note? %>
+  <div class=note>
+    <%= render self, 'text' %>
+  </div>
+<% else %>
 <% case style %>
 <% when 'symbols', 'empty' %>
   <ul class="<%= style %>"><% for element in elements %>
     <li><%= render element %></li>
   <% end %></ul>
-<% when 'numbers', 'alpha' %>
+<% when 'numbers', 'alpha', 'letters', 'format' %>
   <ol class="<%= style %>"><% for element in elements %>
     <li><%= render element %></li>
   <% end %></ol>
@@ -13,4 +18,5 @@
     <dd><%= render element %></dd>
   <% end %></dl>
 <% else raise "unrecognized list style: #{style.inspect}" %>
+<% end %>
 <% end %>

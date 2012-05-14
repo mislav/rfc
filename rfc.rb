@@ -1,8 +1,10 @@
 require 'nokogiri'
 require 'delegate'
+require 'forwardable'
 require 'active_support/memoizable'
 require 'active_support/core_ext/object/blank'
 require 'active_support/core_ext/string/inflections'
+require 'active_support/core_ext/array/grouping'
 require 'erubis'
 
 module RFC
@@ -27,6 +29,16 @@ module RFC
       element.document = self.document
       yield element if block_given?
       element
+    end
+
+    IGNORED_ELEMENTS = %w[iref cref]
+
+    def element_names
+      element_children.map(&:node_name) - IGNORED_ELEMENTS
+    end
+
+    def text_children
+      children.select(&:text?)
     end
 
     def template_name
@@ -120,11 +132,22 @@ module RFC
     end
 
     def elements
-      element_children.map do |node|
+      element_children.each_with_object([]) do |node, all|
         case node.name
-        when 'section' then wrap(node, Section, self)
-        when 'figure' then wrap(node, Figure)
-        when 't' then wrap(node, Text)
+        when 'section'   then all << wrap(node, Section, self)
+        when 'figure'    then all << wrap(node, Figure)
+        when 'texttable' then all << wrap(node, Table)
+        when 't'
+          text = wrap(node, Text)
+          in_definition_list = all.last.is_a? DefinitionList
+          if text.definition? in_definition_list
+            all << DefinitionList.new(document) unless in_definition_list
+            all.last.add_element text
+          else
+            all << text
+          end
+        when 'iref', 'cref'
+          # ignore
         else
           raise "unrecognized section-level node: #{node.name}"
         end
@@ -146,11 +169,7 @@ module RFC
     end
 
     def href
-      if (target =~ /^[\w-]+:/) == 0
-        target
-      else
-        '#' + target.parameterize
-      end
+      document.href_for(target)
     end
   end
 
@@ -158,7 +177,7 @@ module RFC
   end
 
   class Text < NodeWrapper
-    def blocks
+    def elements
       children.each_with_object([[]]) do |node, all|
         if node.element?
           case node.name
@@ -170,7 +189,9 @@ module RFC
             all.last << wrap(node, Xref)
           when 'spanx'
             all.last << wrap(node, Span)
-          when 'iref'
+          when 'figure'
+            all.last << wrap(node, Figure)
+          when 'iref', 'cref'
             # ignore
           else
             $stderr.puts node.inspect if $-d
@@ -183,12 +204,32 @@ module RFC
     end
 
     def list?
-      element_children.map(&:node_name) == %w[list] and
-        children.select(&:text?).all?(&:blank?)
+      element_names == %w[list] and text_children.all?(&:blank?)
     end
 
     def list
       wrap('./list', List)
+    end
+
+    # The element is a definition list item when it contains only 1 text node
+    # (definition title) and a list with a single item (definition description).
+    #
+    # However, if this element follows another definition item, then the inner
+    # list can have multiple items.
+    def definition? following_another = false
+      element_names == %w[list] and title = definition_title and
+        following_another || list.element_names == %w[t]
+    end
+
+    def definition_title
+      nodes = text_children.select {|t| !t.blank? }
+      if nodes.size == 1 and !nodes.first.text.strip.include?("\n")
+        nodes.first
+      end
+    end
+
+    def definition_description
+      search('./list/t').map {|t| wrap(t, Text) }
     end
   end
 
@@ -208,6 +249,21 @@ module RFC
       type = 'alpha' if type == 'format (%C)'
       type
     end
+
+    def note?
+      first_element_child.text =~ /\A\s*Note:\s/
+    end
+  end
+
+  class DefinitionList < Struct.new(:document, :elements)
+    extend Forwardable
+    def_delegator :elements, :<<, :add_element
+
+    def initialize(doc, els = [])
+      super(doc, els)
+    end
+
+    def template_name() 'definition_list' end
   end
 
   class Figure < NodeWrapper
@@ -251,6 +307,24 @@ module RFC
     end
   end
 
+  class Table < NodeWrapper
+    def columns
+      search('./ttcol')
+    end
+
+    def rows
+      search('./c').map {|c| wrap(c, Text) }.in_groups_of(columns.size, false)
+    end
+
+    def preamble
+      wrap('./preamble', Text) { |t| t.classnames << 'preamble' }
+    end
+
+    def postamble
+      wrap('./postamble', Text) { |t| t.classnames << 'postamble' }
+    end
+  end
+
   class Reference < NodeWrapper
     def id?
       self['anchor'].present?
@@ -282,6 +356,8 @@ module RFC
   end
 
   class Document < NodeWrapper
+    attr_accessor :href_resolver
+
     def initialize(from)
       super Nokogiri::XML(from)
       scope '/rfc'
@@ -353,6 +429,7 @@ module RFC
       all('./front/keyword/text()').map(&:text)
     end
 
+    # TODO: add memoization
     def anchor_map
       all('.//*[@anchor]').each_with_object({}) do |node, map|
         map[node['anchor']] = node
@@ -370,6 +447,15 @@ module RFC
         else
           node['title']
         end
+      end
+    end
+
+    def href_for(target)
+      if (target =~ /^[\w-]+:/) == 0
+        target
+      else
+        href_resolver && href_resolver.call(target) ||
+          ('#' + target.parameterize)
       end
     end
 
@@ -393,6 +479,8 @@ module RFC
     end
 
     def render_inline(elements)
+      # Array() doesn't work with text node, for some reason
+      elements = [elements] unless Array === elements
       elements.map do |el|
         if el.is_a? Xref
           link_to el.text, el.href
@@ -416,6 +504,10 @@ module RFC
 
     def mail_to(email, text = email, classnames = nil)
       link_to text, "mailto:#{email}", classnames
+    end
+
+    def debug(obj)
+      %(<pre>#{h obj.inspect}</pre>)
     end
   end
 

@@ -1,11 +1,11 @@
-<% if list? %>
+<% if respond_to? :list? and list? %>
   <%= render list %>
 <% else %>
-  <% for block in blocks %>
-    <% if block.is_a? Array %>
-      <p<%= class_attribute %>><%= render_inline block %></p>
+  <% for element in elements %>
+    <% if element.is_a? Array %>
+      <p<%= class_attribute %>><%= render_inline element %></p>
     <% else %>
-      <%= render block %>
+      <%= render element %>
     <% end %>
   <% end %>
 <% end %>

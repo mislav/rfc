@@ -37,53 +37,55 @@ ul.empty
   list-style: none
 ol.alpha
   list-style: upper-latin
+ol.letters
+  list-style: upper-roman
 
 article
   padding: $gridGutterWidth 0
   position: relative
-  h1
-    border-bottom: 3px solid $grayLighter
-    margin-bottom: $baseLineHeight
-
-aside
-  +screen(phone)
-    display: none
-  ol
-    margin: 0
-    padding: 0
-    list-style: none
-    li
-      margin: 0
-      padding: 0
-    ol
-      list-style: square
-      margin-left: $baseLineHeight
-      margin-bottom: $baseLineHeight / 2
-      li
-        color: $grayLight
-        padding-top: $baseFontSize / 3
-        line-height: $baseFontSize
-      a
-        color: $grayDark
-        &:hover
-          color: $grayDarker
-
-+screen(nonphone)
-  article
+  +screen(nonphone)
     max-width: 50em
     padding-left: $sidebarWidth + $gridGutterWidth
+
+  div.note
+    @extend .well
+
   aside
-    display: block
-    width: $sidebarWidth
-    padding: $gridGutterWidth ($gridGutterWidth / 2)
-    border-right: 1px solid silver
-    position: fixed
-    top: 0
-    left: 0
-    bottom: 0
-    -webkit-box-sizing: border-box
-    -moz-box-sizing: border-box
-    box-sizing: border-box
-    overflow-y: auto
-    overflow-x: hidden
-    -webkit-overflow-scrolling: touch
+    +screen(phone)
+      display: none
+    +screen(nonphone)
+      display: block
+      width: $sidebarWidth
+      padding: $gridGutterWidth ($gridGutterWidth / 2)
+      border-right: 1px solid silver
+      position: fixed
+      top: 0
+      left: 0
+      bottom: 0
+      -webkit-box-sizing: border-box
+      -moz-box-sizing: border-box
+      box-sizing: border-box
+      overflow-y: auto
+      overflow-x: hidden
+      -webkit-overflow-scrolling: touch
+    > ol > li
+      font-weight: bold
+    ol
+      margin: 0
+      padding: 0
+      list-style: none
+      li
+        margin: 0
+        padding: 0
+      ol
+        list-style: square
+        margin-left: $baseLineHeight
+        margin-bottom: $baseLineHeight / 2
+        li
+          color: $grayLight
+          padding-top: $baseFontSize / 3
+          line-height: $baseFontSize
+        a
+          color: $grayDark
+          &:hover
+            color: $grayDarker

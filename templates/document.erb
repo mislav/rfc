@@ -1,19 +1,19 @@
 <style>body { string-set: short-title "<%== (short_title || title).gsub('"', '\"') %>" }</style>
-<!--<meta name="keywords" content="<%== keywords.join(', ') %>">-->
 
 <article>
 <section class="titlepage">
-  <% if number? %><p class="rfc">
-    RFC <%== number %>
-    <% if category? %>(<%== category %> document)<% end %>
-  </p><% end %>
-  <h1><%== title %></h1>
+  <div class=page-header>
+    <h1>
+      <%== title %>
+      <small>RFC&nbsp;<%== number %></small>
+    </h1>
+  </div>
 
   <% if abstract? %><%= render abstract %><% end %>
 
   <% if authors? %>
   <section class="authors">
-    <p>Authors:</p>
+    <h3>Authors:</h3>
     <ol><% for author in authors %>
       <li class="vcard">
         <%= link_to author.name, author.url, %w[url fn] %><% if author.organization? %>,
@@ -27,7 +27,9 @@
 </section>
 
 <aside>
-  <ol class=toc><% for section in sections %>
+  <ol class=toc>
+    <li>RFC&nbsp;<%== number %></li>
+  <% for section in sections %>
     <li><a href="#<%= section.id %>"><%= section.title %></a></li>
     <ol><% for subsection in section.sections %>
       <li><a href="#<%= subsection.id %>"><%= subsection.title %></a></li>

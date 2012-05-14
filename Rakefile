@@ -19,7 +19,7 @@ task :import_index => ['tmp/rfc-index.xml', :environment] do |task|
   require 'active_support/core_ext/object/try'
   require 'date'
 
-  DataMapper.logger.set_log($stderr, :warn)
+  DataMapper.logger.set_log($stderr, :debug)
 
   index = Nokogiri File.open(task.prerequisites.first)
   num = 0
@@ -45,10 +45,10 @@ task :import_index => ['tmp/rfc-index.xml', :environment] do |task|
     entry.obsoleted     = xml_entry.search('./obsoleted-by').any?
     entry.publish_date  = date_from_xml.(xml_entry.at('./date'))
     num += 1 if entry.dirty?
-    entry.save!
+    entry.save
   end
 
-  puts "updated #{num} entries."
+  puts "updated #{num} entries (%d in database)." % RfcEntry.count
 end
 
 file 'tmp/rfc-index.xml' do |task|
@@ -63,6 +63,7 @@ task :import_popular => :environment do
 
   popular = []
   pop_url = 'http://www.faqs.org/rfc-pop%d.html'
+  num = 0
 
   (1..5).each do |n|
     html = Nokogiri open(pop_url % n)
@@ -72,11 +73,13 @@ task :import_popular => :environment do
   end
 
   popular.each_with_index do |name, idx|
-    if entry = RfcEntry.get_rfc(name)
+    if entry = RfcEntry.get(name)
       entry.popularity = idx + 1
-      entry.save!
+      entry.save
+      num += 1
     else
       warn "could not find #{name}"
     end
   end
+  puts "applied popular score to #{num} entries."
 end

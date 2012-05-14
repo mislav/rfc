@@ -15,11 +15,11 @@
   <% if @results.any? %>
   <ol>
     <% for rfc in @results %>
-      <li<%= ' class=obsoleted' if rfc.obsoleted %>>
-        <span class=document-id><%= display_document_id rfc %></span>
-        <% if rfc.obsoleted %><span class="label label-warning">obsolete</span><% end %>
+      <li<%= ' class=obsoleted' if rfc.obsoleted? %>>
+        <a class=document-id href="<%= rfc_path rfc %>"><%= display_document_id rfc %></a>
+        <% if rfc.obsoleted? %><span class="label label-warning">obsolete</span><% end %>
         <h2><a href="<%= rfc_path rfc %>"><%= rfc.title %></a></h2>
-        <%= rfc.abstract.try(:sub, /\[STANDARDS[ -]{1,2}TRA?CK\]/, '') %>
+        <%= display_abstract rfc.abstract %>
       </li>
     <% end %>
   </ol>

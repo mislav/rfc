@@ -1,0 +1,10 @@
+<% if elements.size > 1 %>
+<dl><% for item in elements %>
+  <dt><%= render_inline item.definition_title %></dt>
+  <dd><% for description in item.definition_description %>
+    <%= render description %>
+  <% end %></dd>
+<% end %></dl>
+<% else %>
+  <%= render self, 'text' %>
+<% end %>

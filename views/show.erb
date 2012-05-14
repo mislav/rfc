@@ -1,0 +1,25 @@
+<% page_title '%s: %s' % [display_document_id(@rfc), @rfc.title] %>
+
+<% if @rfc.pretty? %>
+  <%= @rfc.body %>
+<% else %>
+  <div class=container>
+    <div class=page-header>
+      <h1>
+        <%== @rfc.title %>
+        <small><%= display_document_id @rfc %></small>
+      </h1>
+    </div>
+    <div class="alert alert-block">
+      <h4 class=alert-heading>Could not prettify this RFC</h4>
+      <p>The source XML for this RFC isn't available, therefore it can't be reformatted.</p>
+    </div>
+    <%= display_abstract @rfc.abstract %>
+
+    <ul class=unstyled>
+      <li>
+        <a class=btn href="<%= @rfc.external_url %>">Read the full version &rarr;</a>
+      </li>
+    </ul>
+  </div>
+<% end %>

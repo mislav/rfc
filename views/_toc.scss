@@ -30,9 +30,7 @@ article, .article {
   .titlepage {
     h2, h3, h4 { &::before { content: normal } }
   }
-  .titlepage + section, .titlepage + .section {
-    counter-reset: chapter;
-  }
+  .titlepage + * { counter-reset: chapter }
   // poor man's nested counters
   > section, > .section {
     counter-reset: section;

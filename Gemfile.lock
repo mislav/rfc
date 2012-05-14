@@ -22,6 +22,8 @@ GEM
     dm-postgres-adapter (1.2.0)
       dm-do-adapter (~> 1.2.0)
       do_postgres (~> 0.10.6)
+    dm-timestamps (1.2.0)
+      dm-core (~> 1.2.0)
     do_postgres (0.10.8)
       data_objects (= 0.10.8)
     erubis (2.7.0)
@@ -61,6 +63,7 @@ DEPENDENCIES
   coffee-script
   dm-migrations
   dm-postgres-adapter
+  dm-timestamps
   erubis
   i18n
   nokogiri

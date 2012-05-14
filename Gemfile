@@ -20,3 +20,4 @@ gem 'erubis'
 
 gem 'dm-postgres-adapter'
 gem 'dm-migrations'
+gem 'dm-timestamps'
