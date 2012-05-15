@@ -1,12 +1,41 @@
-@import "bootstrap"
-@import "screen"
-@import "print"
-@import "toc"
+@import bootstrap
+@import screen
+@import print
+@import toc
 
 $sidebarWidth: 230px
+$phonePadding: 8px
+
++screen(phone)
+  body
+    font-size: 14px
+    padding: $phonePadding
+  .container
+    width: auto
+  .row
+    margin-left: 0
+  .row > [class*="span"], .row-fluid > [class*="span"]
+    float: none
+    display: block
+    width: auto
+    margin: 0
+  .page-header
+    margin-top: 0
+  .hero-unit
+    padding: $phonePadding
+    margin-bottom: $phonePadding
+    h1
+      font-size: 38px
+    p
+      font-size: 16px
+      line-height: 1.6
+
++screen(tablet)
+  +grid-core-generate(42px, 20px)
 
 #home
-  padding-top: 2em
+  +screen(nonphone)
+    padding-top: 2em
 
   h1
     margin-bottom: .8em
@@ -20,8 +49,9 @@ $sidebarWidth: 230px
     font-weight: bold
     border-bottom-color: $grayLight
 
-  footer
-    padding-top: .5em
+  +screen(nonphone)
+    footer
+      padding-top: .5em
 
 #search
   h2
