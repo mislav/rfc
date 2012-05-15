@@ -11,5 +11,17 @@
 
 <body>
   <%= yield %>
+
+  <script>
+    var _gauges = _gauges || [];
+    if ("pretty-rfc.herokuapp.com" == location.host) (function() {
+      var t = document.createElement('script');
+      t.type = 'text/javascript'; t.async = true;
+      t.setAttribute('data-site-id', '4fb1a0d4f5a1f50e0600019a');
+      t.src = '//secure.gaug.es/track.js'; t.id = 'gauges-tracker';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(t, s);
+    })();
+  </script>
 </body>
 </html>

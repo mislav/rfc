@@ -77,7 +77,7 @@ helpers do
 end
 
 before do
-  page_title "Pretty RFCs"
+  page_title "Pretty RFC"
 end
 
 error 404 do
