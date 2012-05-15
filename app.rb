@@ -72,6 +72,11 @@ helpers do
     url doc_id, false
   end
 
+  # used internally in the RFC HTML generation phase
+  def href_resolver
+    ->(xref) { rfc_path(xref) if xref =~ /^RFC\d+$/ }
+  end
+
   def home_path
     url '/'
   end
@@ -107,6 +112,11 @@ get "/search" do
   erb :search
 end
 
+get "/url/*" do
+  rfc = RfcDocument.resolve_url(params[:splat].first, href_resolver) { not_found }
+  redirect to(rfc.id)
+end
+
 get "/:doc_id" do
   @rfc = RfcDocument.fetch(params[:doc_id]) { not_found }
   redirect to(@rfc.id) unless request.path == "/#{@rfc.id}"
@@ -114,6 +124,6 @@ get "/:doc_id" do
   cache_control :public
   last_modified @rfc.last_modified
 
-  @rfc.make_pretty ->(xref) { rfc_path(xref) if xref =~ /^RFC\d+$/ }
+  @rfc.make_pretty href_resolver
   erb :show
 end
