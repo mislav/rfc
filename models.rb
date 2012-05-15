@@ -1,4 +1,5 @@
 require_relative 'rfc'
+require 'active_support/core_ext/date_time/conversions'
 
 class RfcDocument
   extend Forwardable
@@ -21,10 +22,34 @@ class RfcDocument
       entry = RfcEntry.get doc_id
       entry ? wrap(entry) : yield
     end
+
+    def resolve_url url, href_resolver = nil
+      doc_id = File.basename(url).sub(/\.(html|xml|txt)$/, '')
+      if doc_id.start_with? 'draft-'
+        doc_id.sub!(/-\d+$/, '') # strip draft version
+        fetch(doc_id) {
+          doc = wrap(RfcEntry.new)
+          doc.initialize_draft(doc_id, href_resolver) { yield }
+        }
+      else
+        fetch(doc_id) { yield }
+      end
+    end
   end
 
   def initialize entry
     @entry = entry
+  end
+
+  def initialize_draft doc_id, href_resolver
+    entry.document_id = doc_id
+    saved = fetch_and_render href_resolver do |xml_doc, fetcher|
+      entry.title = fetcher.title
+      entry.keywords = xml_doc.keywords
+      entry.save
+    end
+
+    saved ? self : yield
   end
 
   def external_url
@@ -36,18 +61,29 @@ class RfcDocument
   end
 
   def make_pretty href_resolver
-    if entry.fetcher_version.nil?
-      fetcher = RfcFetcher.new self.id
-      entry.xml_source = fetcher.xml_url
-      entry.fetcher_version = fetcher.version
-
-      if fetcher.fetchable?
-        fetcher.fetch
-        doc = File.open(fetcher.path) {|file| RFC::Document.new file }
-        doc.href_resolver = href_resolver
-        entry.body = RFC::TemplateHelpers.render doc
-      end
+    if needs_fetch?
+      fetch_and_render href_resolver
       entry.save
+    end
+  end
+
+  def needs_fetch?
+    entry.fetcher_version.nil? or
+      entry.fetcher_version < RfcFetcher.version or
+      entry.updated_at.to_time < RFC.last_modified
+  end
+
+  def fetch_and_render href_resolver
+    fetcher = RfcFetcher.new self.id
+    entry.xml_source = fetcher.xml_url
+    entry.fetcher_version = fetcher.version
+
+    if fetcher.fetchable?
+      fetcher.fetch
+      doc = File.open(fetcher.path) {|file| RFC::Document.new file }
+      doc.href_resolver = href_resolver
+      entry.body = RFC::TemplateHelpers.render doc
+      yield doc, fetcher if block_given?
     end
   end
 end
@@ -60,7 +96,7 @@ class RfcEntry
   include DataMapper::Resource
   extend Searchable
 
-  property :document_id,     String,  length: 10,     key: true
+  property :document_id,     String,  length: 70,     key: true
   property :title,           String,  length: 255
   property :abstract,        Text,    length: 2200
   property :keywords,        Text,    length: 500
@@ -81,10 +117,11 @@ class RfcEntry
     private
 
     def normalize_document_id doc_id
-      doc_id.to_s.gsub(/[^a-z0-9]+/i, '') =~ /^([a-z]*)(\d+)$/i
-      type, num = $1.to_s.upcase, $2.to_i
-      type = 'RFC' if type.empty?
-      "#{type}%04d" % num
+      if doc_id.to_s =~ /^ rfc -? (\d+) $/ix
+        "RFC%04d" % $1.to_i
+      else
+        doc_id.to_s
+      end
     end
   end
 
@@ -116,7 +153,7 @@ class RfcFetcher
   end
   self.download_dir = File.join(ENV['TMPDIR'] || '/tmp', 'rfc-xml')
 
-  attr_reader :path
+  attr_reader :title, :path
 
   def initialize doc_id
     @doc_id = doc_id.to_s.downcase
@@ -168,6 +205,7 @@ class RfcFetcher
 
   def find_tracker_xml
     get_html TRACKER_URL % @doc_id do |html|
+      @title = html.at('//h1/text()').text.strip
       if href = html.at('//table[@id="metatable"]//a[text()="xml"]/@href')
         href.text
       elsif html.search('#metatable td:nth-child(2)').text =~ /^Was (draft-[\w-]+)/

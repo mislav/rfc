@@ -5,7 +5,7 @@
   <div class=page-header>
     <h1>
       <%== title %>
-      <small>RFC&nbsp;<%== number %></small>
+      <small><%= nbsp display_id %></small>
     </h1>
   </div>
 
@@ -28,7 +28,7 @@
 
 <aside>
   <ol class=toc>
-    <li>RFC&nbsp;<%== number %></li>
+    <li><%= nbsp display_id %></li>
   <% for section in sections %>
     <li><a href="#<%= section.id %>"><%= section.title %></a></li>
     <ol><% for subsection in section.sections %>

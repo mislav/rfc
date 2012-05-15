@@ -50,7 +50,12 @@ end
 
 helpers do
   def display_document_id doc
-    doc.id.sub(/(\d+)/, ' \1')
+    doc_id = String === doc ? doc : doc.id
+    if doc_id =~ /^ rfc (\d+) $/ix
+      "RFC %d" % $1.to_i
+    else
+      doc_id
+    end
   end
 
   def display_abstract text
@@ -102,7 +107,7 @@ get "/search" do
   erb :search
 end
 
-get %r{^/ (?<doc_id> [a-z]* -? \d+) $}ix do
+get "/:doc_id" do
   @rfc = RfcDocument.fetch(params[:doc_id]) { not_found }
   redirect to(@rfc.id) unless request.path == "/#{@rfc.id}"
 

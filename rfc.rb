@@ -8,6 +8,13 @@ require 'active_support/core_ext/array/grouping'
 require 'erubis'
 
 module RFC
+  def self.last_modified
+    @last_modified ||= begin
+                         files = [__FILE__] + Dir['templates/**/*']
+                         files.map {|f| File.mtime f }.max
+                       end
+  end
+
   class NodeWrapper < DelegateClass(Nokogiri::XML::Node) 
     extend ActiveSupport::Memoizable
 
@@ -371,6 +378,14 @@ module RFC
       self['number']
     end
 
+    def display_id
+      if number?
+        "RFC #{number}"
+      else
+        self['docName']
+      end
+    end
+
     CATEGORIES = {
       "std" => 'Standards-Track',
       "bcp" => 'Best Current Practices',
@@ -508,6 +523,10 @@ module RFC
 
     def debug(obj)
       %(<pre>#{h obj.inspect}</pre>)
+    end
+
+    def nbsp(str)
+      str.gsub(' ', '&nbsp;')
     end
   end
 
