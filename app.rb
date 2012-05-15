@@ -2,14 +2,18 @@
 require 'sinatra'
 require_relative 'lib/sinatra_boilerplate'
 
+bootstrap_root = File.expand_path('bootstrap', settings.root)
+
 set :sass do
   options = {
     style: settings.production? ? :compressed : :nested,
-    load_paths: ['.', File.expand_path('bootstrap/lib', settings.root)]
+    load_paths: ['.', File.join(bootstrap_root, 'lib')]
   }
   options[:cache_location] = File.join(ENV['TMPDIR'], 'sass-cache') if ENV['TMPDIR']
   options
 end
+
+use Rack::Static, urls: %w[/img], root: bootstrap_root
 
 set :js_assets, %w[zepto.js app.coffee]
 
