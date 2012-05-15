@@ -16,9 +16,11 @@
   <ol>
     <% for rfc in @results %>
       <li<%= ' class=obsoleted' if rfc.obsoleted? %>>
+        <h2><a href="<%= rfc_path rfc %>"><%= rfc.title %></a></h2>
+
         <a class=document-id href="<%= rfc_path rfc %>"><%= display_document_id rfc %></a>
         <% if rfc.obsoleted? %><span class="label label-warning">obsolete</span><% end %>
-        <h2><a href="<%= rfc_path rfc %>"><%= rfc.title %></a></h2>
+
         <%= display_abstract rfc.abstract %>
       </li>
     <% end %>
