@@ -142,7 +142,7 @@ class RfcFetcher
   end
 
   def request url
-    url = URI(url)
+    url = URI(url) unless url.respond_to? :host
     res = Net::HTTP.start(url.host, url.port) {|http| yield http, url.request_uri }
     res.error! if Net::HTTPServerError === res
     res
