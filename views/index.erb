@@ -14,6 +14,9 @@
       <input type=search class=search-query name=q placeholder="Search RFCs">
       <input type=submit value="Search" class=btn>
     </form>
+
+    <p class=note><strong>Note:</strong> most RFCs can't be prettified at the
+    moment, as their source files are unavailable to the public and need to be requested from rfc-editor.org. I'm working on this.</p>
   </div>
 
   <div class=row>
@@ -36,7 +39,11 @@
         Bookmarklet:
         <a href="javascript:window.location='<%= url('/url/') %>'+window.location.toString().replace('#','?hash=')">Prettify RFC</a>
       </p>
-      <p>Coming next: PDF, EPUB &amp; Kindle formats</p>
+      <p>Coming next:</p>
+      <ol>
+        <li>prettify ALL of the RFCs</li>
+        <li>PDF, EPUB &amp; Kindle formats</li>
+      </ol>
       <p>
       By <a href="http://mislav.uniqpath.com">Mislav</a> ·
       <a href="https://github.com/mislav/rfc">Source code on GitHub</a>.
