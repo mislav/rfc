@@ -22,8 +22,8 @@ Dependencies:
 
 By default, the app will try to connect to the database named "rfc" on localhost
 without a username or password. This can be affected with the `DATABASE_URL`
-environment variable. If the database doesn't exist, the boostrap script will
-try to create it.
+environment variable. If the database doesn't exist, the [boostrap
+script][bootstrap] will try to create it.
 
 ~~~ sh
 # initialize dependencies and database
@@ -93,6 +93,7 @@ The templates used for generating HTML are in [templates/][templates].
   [rakefile]:   https://github.com/mislav/rfc/blob/master/Rakefile
   [searchable]: https://github.com/mislav/rfc/blob/master/searchable.rb
   [rfc]:        https://github.com/mislav/rfc/blob/master/rfc.rb
+  [bootstrap]:  https://github.com/mislav/rfc/blob/master/script/bootstrap
   [templates]:  https://github.com/mislav/rfc/tree/master/templates
   [textsearch]: http://www.postgresql.org/docs/9.1/static/textsearch-intro.html
   [pop]:        http://www.faqs.org/rfc-pop1.html

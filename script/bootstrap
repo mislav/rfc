@@ -7,12 +7,27 @@ else
   dbname=rfc
 fi
 
-git submodule update --init
+ruby_version=$(ruby -e 'puts RUBY_VERSION')
 
-bundle install --without production
+if [[ $ruby_version < "1.9" ]]; then
+  echo "ruby version is $ruby_version, but needs to be 1.9" >&2
+  exit 1
+fi
 
 # check if database exists; otherwise create it
 psql -tAl | grep -E "^$dbname\|" >/dev/null || \
   createdb --no-password $dbname
 
+git submodule update --init
+
+# install Bundler if missing
+which bundle >/dev/null || (
+  gem install bundler --no-rdoc --no-ri
+  which rbenv >/dev/null && rbenv rehash
+)
+
+# install ruby gem dependencies
+bundle install --without production
+
+# create db schema & populate the RFC index
 rake bootstrap
