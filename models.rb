@@ -55,7 +55,8 @@ class RfcDocument
   end
 
   def external_url
-    "http://datatracker.ietf.org/doc/#{id.downcase}/"
+    tracker_id = id =~ /^RFC(\d+)$/ ? ('rfc%d' % $1.to_i) : id.downcase
+    "http://datatracker.ietf.org/doc/#{tracker_id}/"
   end
 
   def pretty?
