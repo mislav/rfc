@@ -7,9 +7,10 @@ use Rack::Static, urls: %w[/img], root: bootstrap_root
 configure :production do
   require 'rack/cache'
   use Rack::Cache,
-    verbose:     settings.development?,
-    metastore:   'memcached://localhost:11211/meta',
-    entitystore: 'memcached://localhost:11211/body?compress=true'
+    allow_reload: true,
+    verbose:      settings.development?,
+    metastore:    'memcached://localhost:11211/meta',
+    entitystore:  'memcached://localhost:11211/body?compress=true'
 end
 
 require 'rack/deflater'
