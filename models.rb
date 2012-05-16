@@ -1,6 +1,8 @@
 require_relative 'rfc'
 require 'active_support/core_ext/date_time/conversions'
 
+# The main model which represents an RFC. It delegates persistance to RfcEntry
+# and XML fetching to RfcFetcher.
 class RfcDocument
   extend Forwardable
 
@@ -92,6 +94,7 @@ require 'dm-migrations'
 require 'dm-timestamps'
 require_relative 'searchable'
 
+# A lighweight database model that stores metadata and rendered HTML for an RFC.
 class RfcEntry
   include DataMapper::Resource
   extend Searchable
@@ -141,6 +144,8 @@ require 'fileutils'
 require 'net/http'
 require 'nokogiri'
 
+# Responsible for discovering and fetching of the XML source file for a
+# specific publication.
 class RfcFetcher
   XML_URL     = 'http://xml.resource.org/public/rfc/xml/%s.xml'
   DRAFTS_URL  = 'http://www.ietf.org/id/'

@@ -7,7 +7,13 @@ require 'active_support/core_ext/string/inflections'
 require 'active_support/core_ext/array/grouping'
 require 'erubis'
 
+# This module and accompanying templates in "templates/" implements parsing of
+# RFCs in XML format (per RFC 2629) and rendering them to modern HTML.
+#
+# The XML elements are described in:
+# http://xml.resource.org/authoring/draft-mrose-writing-rfcs.html
 module RFC
+  # The latest timestamp of when any of the dependent source files have changed.
   def self.last_modified
     @last_modified ||= begin
                          files = [__FILE__] + Dir['templates/**/*']
@@ -15,7 +21,8 @@ module RFC
                        end
   end
 
-  class NodeWrapper < DelegateClass(Nokogiri::XML::Node) 
+  # A base class for decorating XML nodes as different data objects.
+  class NodeWrapper < DelegateClass(Nokogiri::XML::Node)
     extend ActiveSupport::Memoizable
 
     # a reference to the main Document object
@@ -38,6 +45,10 @@ module RFC
       element
     end
 
+    # "iref" element is for adding terms to the index. There's no need for
+    # indexes in digital media, so this is ignored.
+    #
+    # "cref" is for internal comments in drafts.
     IGNORED_ELEMENTS = %w[iref cref]
 
     def element_names
@@ -60,6 +71,8 @@ module RFC
       node = at(path) and node.text
     end
 
+    # Change the internal node that this object delegates to by performing a
+    # query. If a block is given, changes it only for the duration of the block.
     def scope(path)
       old_node = __getobj__
       node = at(path)
@@ -82,7 +95,21 @@ module RFC
       define_method(:"#{name}?") { !self.send(name).blank? }
     end
 
-    # TODO: remove memoization
+    # For each public method added, set it to be memoized and define a
+    # same-named predicate method that tests if the original method's result is
+    # not blank.
+    #
+    # Examples
+    #
+    #       # method is defined
+    #       def role
+    #         self['role']
+    #       end
+    #
+    #       # a predicate method is automatically available
+    #       obj.role?
+    #
+    # TODO: remove implicit memoization
     def self.method_added(name)
       if public_method_defined?(name) and not method_defined?(:"_unmemoized_#{name}") and
           name !~ /_unmemoized_|_memoizable$|^freeze$|[?!=]$/ and instance_method(name).arity.zero?
@@ -146,6 +173,7 @@ module RFC
         when 'texttable' then all << wrap(node, Table)
         when 't'
           text = wrap(node, Text)
+          # detect if this block of text actually belongs to a definition list
           in_definition_list = all.last.is_a? DefinitionList
           if text.definition? in_definition_list
             all << DefinitionList.new(document) unless in_definition_list
@@ -210,6 +238,7 @@ module RFC
       end
     end
 
+    # detect if this element is just a list container
     def list?
       element_names == %w[list] and text_children.all?(&:blank?)
     end
@@ -257,6 +286,7 @@ module RFC
       type
     end
 
+    # detect when a list is used for indicating a note block
     def note?
       first_element_child.text =~ /\A\s*Note:\s/
     end
@@ -320,7 +350,8 @@ module RFC
     end
 
     def rows
-      search('./c').map {|c| wrap(c, Text) }.in_groups_of(columns.size, false)
+      cells = search('./c').map {|c| wrap(c, Text) }
+      cells.in_groups_of(columns.size, false)
     end
 
     def preamble
@@ -362,9 +393,11 @@ module RFC
     end
   end
 
+  # Represents the parsed RFC document as a whole.
   class Document < NodeWrapper
     attr_accessor :href_resolver
 
+    # Initialize the document by parsing a string or IO stream as XML
     def initialize(from)
       super Nokogiri::XML(from)
       scope '/rfc'
@@ -444,13 +477,17 @@ module RFC
       all('./front/keyword/text()').map(&:text)
     end
 
-    # TODO: add memoization
+    # TODO: add memoization when implicit memoization is gone
     def anchor_map
       all('.//*[@anchor]').each_with_object({}) do |node, map|
         map[node['anchor']] = node
       end
     end
 
+    # Look up where an anchor string is pointing to to figure out the string it
+    # should display at the point of reference.
+    #
+    # TODO: improve this mess
     def lookup_anchor(name)
       if node = anchor_map[name]
         if 'reference' == node.node_name
@@ -465,6 +502,9 @@ module RFC
       end
     end
 
+    # Resolve the target string as a URL or internal link.
+    #
+    # TODO: improve this mess and ensure that internal links are unique
     def href_for(target)
       if (target =~ /^[\w-]+:/) == 0
         target
@@ -479,6 +519,7 @@ module RFC
     end
   end
 
+  # Template helpers for HTML rendering
   module Helpers
     def section_title(section)
       "<h#{section.level}>#{h section.title}</h#{section.level}>"
@@ -530,8 +571,11 @@ module RFC
     end
   end
 
+  # Template rendering helpers.
   module TemplateHelpers
     extend self
+    # Templates are rendered using the provided object as execution context. The
+    # object is additionally decorated with Helpers and TemplateHelpers modules.
     def render(obj, template = obj.template_name)
       file = "templates/#{template}.erb"
       eruby = Erubis::Eruby.new File.read(file), filename: File.basename(file)
@@ -543,6 +587,7 @@ module RFC
   end
 end
 
+# If this script was called directly, render given XML and output HTML on STDOUT.
 if __FILE__ == $0
   rfc = RFC::Document.new ARGF
 
