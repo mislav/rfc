@@ -103,12 +103,36 @@ ol.letters
 article
   padding: $gridGutterWidth 0
   position: relative
+
+article, .navbar
   +screen(nonphone)
     max-width: 50em
     padding-left: $sidebarWidth + $gridGutterWidth
 
+.navbar
+  +screen(nonphone)
+    margin-top: $gridGutterWidth
+  .nav > li > a
+    padding: 5px 10px
+  +screen(phone)
+    .navbar-inner
+      padding-left: 10px
+      padding-right: 10px
+    .nav > li > a
+      padding: 4px 6px 5px
+  ~ article
+    padding-top: 0
+
+@media print
+  .navbar
+    display: none
+
+article
   div.note
     @extend .well
+
+  .page-header
+    margin-top: 0
 
   aside
     +screen(phone)

@@ -1,10 +1,22 @@
 <% page_title '%s: %s' % [display_document_id(@rfc), @rfc.title] %>
 
 <% if @rfc.pretty? %>
+  <div class=navbar>
+    <div class=navbar-inner>
+      <nav class=container>
+        <ul class=nav>
+          <li><a href="<%= home_path %>">&larr; Home</a></li>
+          <li><a href="<%= @rfc.external_url %>">Offical location</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
   <%= @rfc.body %>
 <% else %>
   <div class=container>
     <div class=page-header>
+      <nav><a href="<%= home_path %>">&larr; Home</a></nav>
       <h1>
         <%== @rfc.title %>
         <small><%= display_document_id @rfc %></small>
@@ -18,7 +30,7 @@
 
     <ul class=unstyled>
       <li>
-        <a class=btn href="<%= @rfc.external_url %>">Read the full version &rarr;</a>
+        <a class=btn href="<%= @rfc.external_url %>">Read it from offical location &rarr;</a>
       </li>
     </ul>
   </div>
