@@ -1,0 +1,18 @@
+<div id=error class=container>
+
+  <div class="hero-unit page-header">
+    <h1>BOOM! Something exploded.</h1>
+    <% if defined? error_type %>
+    <p>
+      The error message was:<br>
+      <strong><%== error_type %>:</strong>
+      <%== error_message %>
+    </p>
+    <% end %>
+    <p>
+      Please <a href="https://github.com/mislav/rfc/issues">report bugs here</a>.
+    </p>
+    <nav><a href="<%= home_path %>">&larr; Home</a></nav>
+  </div>
+
+</div>

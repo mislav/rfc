@@ -101,6 +101,16 @@ error 404 do
   erb :not_found
 end
 
+error do
+  err = env['sinatra.error']
+  locals = {}
+  if err.respond_to? :message
+    locals[:error_type]    = err.class.name
+    locals[:error_message] = err.message
+  end
+  erb :error, {}, locals
+end
+
 get "/" do
   cache_control :public
   last_modified File.mtime('views/index.erb')
