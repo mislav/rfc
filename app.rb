@@ -119,8 +119,9 @@ get "/" do
 end
 
 get "/search" do
+  @query = params[:q].to_s.strip
+  redirect to('/RFC%04d' % $1.to_i) if @query =~ /^(?:rfc\s*)?(\d+)$/
   expires 5 * 60, :public
-  @query = params[:q]
   @limit = 50
   @results = RfcDocument.search @query, page: params[:page], limit: @limit
   erb :search
