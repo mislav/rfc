@@ -4,7 +4,7 @@ task :environment do
   require_relative 'app'
 end
 
-task :bootstrap => [:'db:rebuild', :import_index, :import_popular]
+task :bootstrap => [:'db:bootstrap', :import_index, :import_popular]
 
 namespace :db do
   task :rebuild => :environment do
@@ -14,6 +14,14 @@ namespace :db do
   task :migrate => :environment do
     DataMapper.auto_upgrade!
   end
+
+  task :bootstrap => :environment do
+    if RfcEntry.storage_exists?
+      Rake::Task[:'db:migrate'].invoke
+    else
+      Rake::Task[:'db:rebuild'].invoke
+    end
+  end
 end
 
 task :import_index => ['tmp/rfc-index.xml', :environment] do |task|
@@ -21,7 +29,7 @@ task :import_index => ['tmp/rfc-index.xml', :environment] do |task|
   require 'active_support/core_ext/object/try'
   require 'date'
 
-  DataMapper.logger.set_log($stderr, :debug)
+  DataMapper.logger.set_log($stderr, :warn)
 
   index = Nokogiri File.open(task.prerequisites.first)
   num = 0

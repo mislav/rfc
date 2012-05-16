@@ -33,7 +33,7 @@ end
 require 'dm-core'
 
 configure :development do
-  DataMapper::Logger.new($stderr, :debug)
+  DataMapper::Logger.new($stderr, :info)
 end
 
 configure do

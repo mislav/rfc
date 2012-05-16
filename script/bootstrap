@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+if [[ -n $DATABASE_URL ]]; then
+  dbname=$(basename "$DATABASE_URL")
+else
+  dbname=rfc
+fi
+
+git submodule update --init
+
+bundle install --without production
+
+# check if database exists; otherwise create it
+psql -tAl | grep -E "^$dbname\|" >/dev/null || \
+  createdb --no-password $dbname
+
+rake bootstrap
