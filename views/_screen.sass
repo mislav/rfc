@@ -3,7 +3,7 @@
   @if $type == phone
     @media only screen and (max-width : 480px)
       @content
-  @if $type == nonphone
+  @else if $type == nonphone
     @media only screen and (min-width : 481px)
       @content
   @else if $type == tablet
