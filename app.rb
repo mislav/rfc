@@ -93,6 +93,8 @@ helpers do
   end
 end
 
+require_relative 'lib/auto_last_modified'
+
 before do
   page_title "Pretty RFC"
 end
@@ -112,9 +114,8 @@ error do
 end
 
 get "/" do
-  cache_control :public
-  last_modified File.mtime('views/index.erb')
-  erb :index
+  expires 5 * 60, :public
+  erb :index, auto_last_modified: true
 end
 
 get "/search" do
@@ -131,12 +132,11 @@ get "/url/*" do
 end
 
 get "/:doc_id" do
+  expires 5 * 60, :public
+
   @rfc = RfcDocument.fetch(params[:doc_id]) { not_found }
   redirect to(@rfc.id) unless request.path == "/#{@rfc.id}"
 
-  cache_control :public
-  last_modified @rfc.last_modified
-
   @rfc.make_pretty href_resolver
-  erb :show
+  erb :show, auto_last_modified: @rfc.last_modified
 end
