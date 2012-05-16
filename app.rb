@@ -128,7 +128,9 @@ end
 
 get "/url/*" do
   rfc = RfcDocument.resolve_url(params[:splat].first, href_resolver) { not_found }
-  redirect to(rfc.id)
+  target = url(rfc.id)
+  target << '#' << params[:hash] if params[:hash]
+  redirect target
 end
 
 get "/:doc_id" do
