@@ -1,8 +1,21 @@
 # encoding: utf-8
 require 'sinatra'
-require_relative 'lib/sinatra_boilerplate'
 
 bootstrap_root = File.expand_path('bootstrap', settings.root)
+use Rack::Static, urls: %w[/img], root: bootstrap_root
+
+configure :production do
+  require 'rack/cache'
+  use Rack::Cache,
+    verbose:     settings.development?,
+    metastore:   'memcached://localhost:11211/meta',
+    entitystore: 'memcached://localhost:11211/body?compress=true'
+end
+
+require 'rack/deflater'
+use Rack::Deflater
+
+require_relative 'lib/sinatra_boilerplate'
 
 set :sass do
   options = {
@@ -13,21 +26,11 @@ set :sass do
   options
 end
 
-use Rack::Static, urls: %w[/img], root: bootstrap_root
-
 set :js_assets, %w[zepto.js app.coffee]
 
 configure :development do
   set :logging, false
   ENV['DATABASE_URL'] ||= 'postgres://localhost/rfc'
-end
-
-configure :production do
-  require 'rack/cache'
-  use Rack::Cache,
-    verbose:     true,
-    metastore:   'memcached://localhost/meta',
-    entitystore: 'memcached://localhost/body?compress=true'
 end
 
 require 'dm-core'
