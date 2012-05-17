@@ -73,11 +73,15 @@ class RfcDocument
   def needs_fetch?
     entry.fetcher_version.nil? or
       entry.fetcher_version < RfcFetcher.version or
-      entry.updated_at.to_time < RFC.last_modified
+      needs_rerender?
   end
 
-  def fetch_and_render
-    fetcher = RfcFetcher.new self.id
+  def needs_rerender?
+    entry.body and entry.updated_at.to_time < RFC.last_modified
+  end
+
+  def fetch_and_render xml_url = entry.xml_source
+    fetcher = RfcFetcher.new self.id, xml_url
     entry.xml_source = fetcher.xml_url
     entry.fetcher_version = fetcher.version
 
@@ -88,6 +92,12 @@ class RfcDocument
       entry.body = RFC::TemplateHelpers.render doc
       yield doc, fetcher if block_given?
     end
+  end
+
+  # Bypass discovery process by explicitly seting a known XML location
+  def set_xml_source xml_url
+    fetch_and_render xml_url
+    entry.save
   end
 
   # used in the RFC HTML generation phase
@@ -166,8 +176,9 @@ class RfcFetcher
 
   attr_reader :title, :path
 
-  def initialize doc_id
+  def initialize doc_id, known_url = nil
     @doc_id = doc_id.to_s.downcase
+    @xml_url = known_url unless known_url.nil?
   end
 
   def version() self.class.version end
@@ -185,7 +196,7 @@ class RfcFetcher
     @path = File.join self.class.download_dir, @doc_id + '.xml'
     unless File.exist? @path
       FileUtils.mkdir_p File.dirname(@path)
-      system 'curl', '--silent', xml_url.to_s, '-o', @path
+      system 'curl', '-L', '--silent', xml_url.to_s, '-o', @path
     end
   end
 
