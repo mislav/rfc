@@ -25,13 +25,13 @@ class RfcDocument
       entry ? wrap(entry) : yield
     end
 
-    def resolve_url url, href_resolver = nil
+    def resolve_url url
       doc_id = File.basename(url).sub(/\.(html|xml|txt)$/, '')
       if doc_id.start_with? 'draft-'
         doc_id.sub!(/-\d+$/, '') # strip draft version
         fetch(doc_id) {
           doc = wrap(RfcEntry.new)
-          doc.initialize_draft(doc_id, href_resolver) { yield }
+          doc.initialize_draft(doc_id) { yield }
         }
       else
         fetch(doc_id) { yield }
@@ -43,9 +43,9 @@ class RfcDocument
     @entry = entry
   end
 
-  def initialize_draft doc_id, href_resolver
+  def initialize_draft doc_id
     entry.document_id = doc_id
-    saved = fetch_and_render href_resolver do |xml_doc, fetcher|
+    saved = fetch_and_render do |xml_doc, fetcher|
       entry.title = fetcher.title
       entry.keywords = xml_doc.keywords
       entry.save
@@ -63,9 +63,9 @@ class RfcDocument
     !entry.body.nil?
   end
 
-  def make_pretty href_resolver
+  def make_pretty
     if needs_fetch?
-      fetch_and_render href_resolver
+      fetch_and_render
       entry.save
     end
   end
@@ -76,7 +76,7 @@ class RfcDocument
       entry.updated_at.to_time < RFC.last_modified
   end
 
-  def fetch_and_render href_resolver
+  def fetch_and_render
     fetcher = RfcFetcher.new self.id
     entry.xml_source = fetcher.xml_url
     entry.fetcher_version = fetcher.version
@@ -88,6 +88,11 @@ class RfcDocument
       entry.body = RFC::TemplateHelpers.render doc
       yield doc, fetcher if block_given?
     end
+  end
+
+  # used in the RFC HTML generation phase
+  def href_resolver
+    ->(xref) { "/#{xref}" if xref =~ /^RFC\d+$/ }
   end
 end
 
