@@ -1,6 +1,8 @@
 # encoding: utf-8
 require 'sinatra'
 
+use Rack::Static, :urls => %w[/favicon.ico /apple-touch-icon], :root => 'public'
+
 bootstrap_root = File.expand_path('bootstrap', settings.root)
 use Rack::Static, urls: %w[/img], root: bootstrap_root
 
