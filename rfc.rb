@@ -169,6 +169,7 @@ module RFC
       element_children.each_with_object([]) do |node, all|
         case node.name
         when 'section'   then all << wrap(node, Section, self)
+        when 'list'      then all << wrap(node, List)
         when 'figure'    then all << wrap(node, Figure)
         when 'texttable' then all << wrap(node, Table)
         when 't'
@@ -225,7 +226,7 @@ module RFC
           when 'spanx'
             all.last << wrap(node, Span)
           when 'figure'
-            all.last << wrap(node, Figure)
+            all << wrap(node, Figure) << []
           when 'iref', 'cref'
             # ignore
           else
