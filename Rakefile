@@ -1,6 +1,4 @@
 task :environment do
-  require 'bundler'
-  Bundler.setup
   require_relative 'app'
 end
 
