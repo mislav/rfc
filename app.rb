@@ -89,10 +89,6 @@ helpers do
       @page_title
     end
   end
-
-  def base_url
-    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
-  end
 end
 
 require_relative 'lib/auto_last_modified'
