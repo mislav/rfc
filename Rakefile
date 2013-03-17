@@ -2,17 +2,21 @@ task :environment do
   require_relative 'app'
 end
 
+desc %(Create the database, prepare schema, import RFC index)
 task :bootstrap => [:'db:bootstrap', :import_index, :import_popular]
 
 namespace :db do
+  desc %(Rebuild the db schema)
   task :rebuild => :environment do
     DataMapper.auto_migrate!
   end
 
+  desc %(Automatically migrate the db schema based on changed model attributes)
   task :migrate => :environment do
     DataMapper.auto_upgrade!
   end
 
+  desc %(Create and upgrade the database schema if necessary)
   task :bootstrap => :environment do
     if RfcEntry.storage_exists?
       Rake::Task[:'db:migrate'].invoke
@@ -22,6 +26,7 @@ namespace :db do
   end
 end
 
+desc %(Import the complete RFC index into the database)
 task :import_index => ['tmp/rfc-index.xml', :environment] do |task|
   require 'nokogiri'
   require 'active_support/core_ext/object/try'
@@ -65,6 +70,7 @@ file 'tmp/rfc-index.xml' do |task|
   sh 'curl', '-#', index_url, '-o', task.name
 end
 
+desc %(Update the RFCs in the database with a popularity score)
 task :import_popular => :environment do
   require 'nokogiri'
   require 'open-uri'
