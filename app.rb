@@ -34,7 +34,6 @@ end
 set :js_assets, %w[zepto.js app.coffee]
 
 configure :development do
-  set :logging, false
   ENV['DATABASE_URL'] ||= 'postgres://localhost/rfc'
 
   begin
