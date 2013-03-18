@@ -158,6 +158,7 @@ end
 
 require 'fileutils'
 require 'net/http'
+require 'cgi'
 require 'nokogiri'
 
 # Responsible for discovering and fetching of the XML source file for a
@@ -202,9 +203,25 @@ class RfcFetcher
 
   def request url
     url = URI(url) unless url.respond_to? :host
-    res = Net::HTTP.start(url.host, url.port) {|http| yield http, url.request_uri }
+    res = Net::HTTP.start(url.host, url.port, *proxy_http_args(url)) { |http|
+      yield http, url.request_uri
+    }
     res.error! if Net::HTTPServerError === res
     res
+  end
+
+  def proxy_http_args(url)
+    args = []
+    env = "HTTP#{url.scheme == 'https' ? 'S' : ''}_PROXY"
+    if proxy_url = (ENV[env] || ENV[env.downcase]) and !proxy_url.empty?
+      proxy = URI(proxy_url)
+      args << proxy.host << proxy.port
+      if proxy.userinfo
+        decode = CGI::method(:unescape)
+        args.concat proxy.userinfo.split(':', 2).map(&decode)
+      end
+    end
+    args
   end
 
   def http_exist? url

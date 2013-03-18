@@ -36,6 +36,15 @@ set :js_assets, %w[zepto.js app.coffee]
 configure :development do
   set :logging, false
   ENV['DATABASE_URL'] ||= 'postgres://localhost/rfc'
+
+  begin
+    require 'socket'
+    TCPSocket.new('localhost', 8888)
+    ENV['http_proxy']  ||= 'http://localhost:8888'
+    ENV['https_proxy'] ||= ENV['http_proxy']
+  rescue Errno::ECONNREFUSED
+    # proxy is not running
+  end
 end
 
 require 'dm-core'
