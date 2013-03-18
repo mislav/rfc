@@ -1,5 +1,7 @@
 # encoding: utf-8
 require 'sinatra'
+require 'sass'
+require 'coffee-script'
 
 use Rack::Static, :urls => %w[/favicon.ico /apple-touch-icon], :root => 'public'
 
