@@ -1,0 +1,2 @@
+#!/bin/sh
+exec irb -r bundler/setup -r ./app.rb
