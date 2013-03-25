@@ -310,7 +310,7 @@ module RFC
     end
 
     def id
-      self['anchor'].parameterize
+      self['anchor']
     end
 
     def title
@@ -370,7 +370,7 @@ module RFC
     end
 
     def id
-      self['anchor'].parameterize
+      self['anchor']
     end
 
     def title
@@ -510,8 +510,7 @@ module RFC
       if (target =~ /^[\w-]+:/) == 0
         target
       else
-        href_resolver && href_resolver.call(target) ||
-          ('#' + target.parameterize)
+        href_resolver && href_resolver.call(target) || "##{target}"
       end
     end
 
