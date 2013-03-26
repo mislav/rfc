@@ -1,4 +1,5 @@
 require_relative 'rfc'
+require_relative 'rfc/html_parser'
 require 'active_support/core_ext/date_time/conversions'
 
 # The main model which represents an RFC. It delegates persistance to RfcEntry

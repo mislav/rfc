@@ -538,10 +538,12 @@ module RFC
       # Array() doesn't work with text node, for some reason
       elements = [elements] unless Array === elements
       elements.map do |el|
-        if el.is_a? Xref
+        if el.respond_to?(:template_name) && el.template_name == 'xref'
           link_to el.text, el.href
-        else
+        elsif el.respond_to?(:text)
           h el.text
+        else
+          h el.to_str
         end
       end.join('')
     end

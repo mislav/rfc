@@ -147,6 +147,16 @@ get "/url/*" do
   redirect target
 end
 
+get "/RFC6749" do
+  doc = File.open('tmp/html/rfc6749.html', 'r') { |file|
+    RFC::HTML::Document.parse(file)
+  }
+  rfc_entry = RfcEntry.new(document_id: 'rfc6749', title: 'OAuth 2')
+  rfc_entry.body = RFC::TemplateHelpers.render doc
+  @rfc = RfcDocument.wrap(rfc_entry)
+  erb :show
+end
+
 get "/:doc_id" do
   expires 5 * 60, :public
 
