@@ -8,6 +8,10 @@ use Rack::Static, :urls => %w[/favicon.ico /apple-touch-icon], :root => 'public'
 bootstrap_root = File.expand_path('bootstrap', settings.root)
 use Rack::Static, urls: %w[/img], root: bootstrap_root
 
+ENV['MEMCACHE_SERVERS']  ||= ENV['MEMCACHIER_SERVERS']
+ENV['MEMCACHE_USERNAME'] ||= ENV['MEMCACHIER_USERNAME']
+ENV['MEMCACHE_PASSWORD'] ||= ENV['MEMCACHIER_PASSWORD']
+
 configure :production do
   require 'rack/cache'
   use Rack::Cache,
