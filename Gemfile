@@ -5,7 +5,7 @@ ruby '2.0.0'
 gem 'rake'
 gem 'sinatra'
 gem 'thin'
-gem 'activesupport'
+gem 'activesupport', '~> 3.1.12' # needs to be locked at 3.1 for memoize
 gem 'i18n' # stupid activesupport dependency
 gem 'rack-cache'
 gem 'dalli'
