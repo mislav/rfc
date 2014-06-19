@@ -168,10 +168,11 @@ module RFC
     def elements
       element_children.each_with_object([]) do |node, all|
         case node.name
-        when 'section'   then all << wrap(node, Section, self)
-        when 'list'      then all << wrap(node, List)
-        when 'figure'    then all << wrap(node, Figure)
-        when 'texttable' then all << wrap(node, Table)
+        when 'section'        then all << wrap(node, Section, self)
+        when 'list'           then all << wrap(node, List)
+        when 'figure'         then all << wrap(node, Figure)
+        when 'texttable'      then all << wrap(node, Table)
+        when 'note'           then all << wrap(node, Text)
         when 't'
           text = wrap(node, Text)
           # detect if this block of text actually belongs to a definition list
@@ -182,6 +183,8 @@ module RFC
           else
             all << text
           end
+        when 'anchor-alias'   #then all << wrap(node, Alias)
+          # ignore until iref is used to create anchors
         when 'iref', 'cref'
           # ignore
         else
@@ -223,12 +226,19 @@ module RFC
             # presentation element. ignore
           when 'xref', 'eref'
             all.last << wrap(node, Xref)
+          when 'anchor-alias'
+            #TODO: enable once iref is used to create anchors
+            #all.last << wrap(node, Alias)
+          when 'dfn', 'ref'
+            all.last << wrap(node, Text)
           when 'spanx'
             all.last << wrap(node, Span)
           when 'figure'
             all << wrap(node, Figure) << []
           when 'iref', 'cref'
             # ignore
+          when 't'
+            all.last << wrap(node, Text)
           else
             $stderr.puts node.inspect if $-d
             raise "unrecognized text-level node: #{node.name}"
@@ -274,7 +284,8 @@ module RFC
     def elements
       element_children.map do |node|
         case node.name
-        when 't' then wrap(node, Text)
+        when 'lt' then wrap(node, Text)
+        when 't'  then wrap(node, Text)
         else
           raise "unrecognized list-level node: #{node.name}"
         end
@@ -391,6 +402,12 @@ module RFC
 
     def series
       all('./seriesInfo').map {|s| "#{s['name']} #{s['value']}" }
+    end
+  end
+
+  class Alias < NodeWrapper
+    def value
+      self['value']
     end
   end
 
