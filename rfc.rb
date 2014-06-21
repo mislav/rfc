@@ -185,7 +185,7 @@ module RFC
           end
         when 'anchor-alias'   #then all << wrap(node, Alias)
           # ignore until iref is used to create anchors
-        when 'iref', 'cref'
+        when 'iref', 'cref', 'Description'
           # ignore
         else
           raise "unrecognized section-level node: #{node.name}"
@@ -237,7 +237,7 @@ module RFC
             all << wrap(node, Figure) << []
           when 'iref', 'cref'
             # ignore
-          when 't'
+          when 't', 'sup'
             all.last << wrap(node, Text)
           else
             $stderr.puts node.inspect if $-d
