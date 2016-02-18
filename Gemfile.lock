@@ -1,8 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (3.2.3)
-      i18n (~> 0.6)
+    activesupport (3.1.12)
       multi_json (~> 1.0)
     addressable (2.2.8)
     coffee-script (2.2.0)
@@ -58,7 +57,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport
+  activesupport (~> 3.1.12)
   coffee-script
   dalli
   dm-migrations
